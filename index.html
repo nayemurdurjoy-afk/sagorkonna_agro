@@ -9,7 +9,29 @@
 </head>
 <body class="bg-gray-100 p-3 md:p-6">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <!-- সহজ পিন/পাসওয়ার্ড ফর্ম (শুরুতে থাকবে) -->
+    <div id="loginModal" class="fixed inset-0 bg-emerald-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-emerald-100">
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span class="text-2xl">🔒</span>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">সাগরকন্যা এগ্রো ফার্ম</h2>
+                <p class="text-xs text-gray-500 mt-1">পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
+            </div>
+            <form id="simpleLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">সিকিউরিটি পাসওয়ার্ড</label>
+                    <input type="password" id="accessPassword" required class="w-full p-3 border rounded-xl text-center text-lg tracking-widest bg-gray-50 focus:bg-white focus:outline-emerald-600" placeholder="••••••••">
+                </div>
+                <p id="passwordError" class="text-xs text-red-600 hidden text-center font-medium"></p>
+                <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-700/20">ড্যাশবোর্ডে প্রবেশ করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- মূল ড্যাশবোর্ড (পাসওয়ার্ড না দেওয়া পর্যন্ত হিডেন থাকবে) -->
+    <div id="mainDashboard" class="max-w-7xl mx-auto space-y-6 hidden">
         
         <!-- হেডার -->
         <header class="bg-emerald-800 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
@@ -19,9 +41,12 @@
                 </div>
                 <p class="text-emerald-200 text-sm mt-1">প্রজেক্ট: বরই বাগান | পার্টনার: আব্দুল্লাহ আল নাইম, সৌরভ, মাহফুজুর রহমান, সুমন</p>
             </div>
-            <div class="bg-emerald-900/80 px-4 py-2 rounded-xl text-right border border-emerald-700">
-                <span class="text-xs text-emerald-300 block">সিস্টেম স্টেটাস</span>
-                <span class="text-xs font-semibold text-emerald-100">Firebase Firestore Live</span>
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-900/80 px-4 py-2 rounded-xl text-right border border-emerald-700">
+                    <span class="text-xs text-emerald-300 block">সিস্টেম স্টেটাস</span>
+                    <span class="text-xs font-semibold text-emerald-100">Firebase Firestore Live</span>
+                </div>
+                <button id="btnLogout" class="bg-emerald-900/90 hover:bg-red-700 text-emerald-100 hover:text-white text-xs px-3 py-2 rounded-xl font-semibold transition border border-emerald-700">লগআউট</button>
             </div>
         </header>
 
@@ -32,7 +57,7 @@
                 <h3 class="text-xl font-extrabold text-gray-800 mt-1" id="totalInvestment">৳ 0</h3>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
-                <p class="text-gray-500 text-xs font-bold uppercase">মোট বরই বিক্রি (আয়)</p>
+                <p class="text-gray-500 text-xs font-bold uppercase">মোট বরই বিক্রি (আয়)</p>
                 <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="totalIncome">৳ 0</h3>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
@@ -60,9 +85,9 @@
                         <tr>
                             <th class="p-3">পার্টনারের নাম</th>
                             <th class="p-3">মোট ইনভেস্টমেন্ট</th>
-                            <th class="p-3">দেওয়া সময় (ঘণ্টা)</th>
-                            <th class="p-3">১০% শ্রম অনারিয়াম</th>
-                            <th class="p-3">৯০% শেয়ার প্রফিট</th>
+                            <th class="p-3">দেওয়া সময় (ঘণ্টা)</th>
+                            <th class="p-3">১০% শ্রম অনারিয়াম</th>
+                            <th class="p-3">৯০% শেয়ার প্রফিট</th>
                             <th class="p-3 font-bold text-emerald-800">মোট প্রাপ্য (Net Profit Share)</th>
                         </tr>
                     </thead>
@@ -78,7 +103,7 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                 <h2 class="text-md font-bold mb-3 text-gray-700 border-b pb-2 flex justify-between items-center">
                     <span>হিসাব এন্ট্রি</span>
-                    <span class="text-xs font-normal text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">আয় / খরচ / জমা</span>
+                    <span class="text-xs font-normal text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">আয় / খরচ / জমা</span>
                 </h2>
                 <form id="transactionForm" class="space-y-3">
                     <div>
@@ -128,10 +153,10 @@
                 </form>
             </div>
 
-            <!-- সময় ট্র্যাকিং -->
+            <!-- সময় ট্র্যাকিং -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                 <h2 class="text-md font-bold mb-3 text-gray-700 border-b pb-2 flex justify-between items-center">
-                    <span>সময় ট্র্যাকিং</span>
+                    <span>সময় ট্র্যাকিং</span>
                     <span class="text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded">১০% অনারিয়াম</span>
                 </h2>
                 <form id="timeForm" class="space-y-3">
@@ -149,14 +174,14 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600">কাজের সময় (ঘণ্টা)</label>
+                        <label class="block text-xs font-semibold text-gray-600">কাজের সময় (ঘণ্টা)</label>
                         <input type="number" step="0.5" id="hoursInput" required class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: 4.5">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-600">কাজের বিবরণ</label>
                         <input type="text" id="workDesc" class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: গাছে স্প্রে করা">
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition">সময় যুক্ত করুন</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition">সময় যুক্ত করুন</button>
                 </form>
             </div>
 
@@ -219,12 +244,11 @@
 
     </div>
 
-    <!-- Firebase SDK Setup -->
+    <!-- Firebase SDK Setup & Password Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // আপনার স্ক্রিনশট থেকে নেওয়া আসল ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             apiKey: "AIzaSyCXuXalreeHCliv7nJoexVtaBFRQF0E1Ho",
             authDomain: "sagarkanya-agro-farm.firebaseapp.com",
@@ -238,6 +262,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // আপনার পাসওয়ার্ডটি এখানে দিন
+        const SECRET_PASSWORD = "123456"; 
+
+        // ব্রাউজারে লগইন সেশন চেক
+        if (sessionStorage.getItem('sagarkanya_auth') === 'true') {
+            showDashboard();
+        }
+
+        // পাসওয়ার্ড যাচাই লজিক
+        document.getElementById('simpleLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputPass = document.getElementById('accessPassword').value;
+            const errDiv = document.getElementById('passwordError');
+
+            if (inputPass === SECRET_PASSWORD) {
+                sessionStorage.setItem('sagarkanya_auth', 'true');
+                showDashboard();
+            } else {
+                errDiv.innerText = "ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।";
+                errDiv.classList.remove('hidden');
+            }
+        });
+
+        // লগআউট
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            sessionStorage.removeItem('sagarkanya_auth');
+            location.reload();
+        });
+
+        function showDashboard() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            initFirebaseListeners();
+        }
+
         // গ্লোবাল ডাটা ট্র্যাকিং
         let totalInv = 0, totalInc = 0, totalExp = 0, totalWith = 0, totalPlum = 0;
         let partnerInvestments = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
@@ -246,7 +305,7 @@
         document.getElementById('transDate').valueAsDate = new Date();
         document.getElementById('workDate').valueAsDate = new Date();
 
-        // অটো ক্যালকুলেটর (বরই দর * কেজি)
+        // অটো ক্যালকুলেটর
         document.getElementById('plumRate').addEventListener('input', calculatePlumTotal);
         document.getElementById('plumQty').addEventListener('input', calculatePlumTotal);
 
@@ -258,7 +317,7 @@
             }
         }
 
-        // ফায়ারবেসে লেনদেন সেভ করা
+        // ফায়ারবেসে লেনদেন সেভ করা
         document.getElementById('transactionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnTrans');
@@ -278,14 +337,14 @@
                 e.target.reset();
                 document.getElementById('transDate').valueAsDate = new Date();
             } catch (error) {
-                alert("ডাটা সেভ করতে সমস্যা হয়েছে: " + error.message);
+                alert("ডাটা সেভ করতে সমস্যা হয়েছে: " + error.message);
             } finally {
                 btn.innerText = "সেভ করুন";
                 btn.disabled = false;
             }
         });
 
-        // ফায়ারবেসে সময় সেভ করা
+        // ফায়ারবেসে সময় সেভ করা
         document.getElementById('timeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -299,57 +358,58 @@
                 e.target.reset();
                 document.getElementById('workDate').valueAsDate = new Date();
             } catch (error) {
-                alert("সময় সেভ করতে সমস্যা হয়েছে: " + error.message);
+                alert("সময় সেভ করতে সমস্যা হয়েছে: " + error.message);
             }
         });
 
-        // ফায়ারবেস থেকে রিয়েলটাইম লেনদেন লোড করা
-        onSnapshot(collection(db, "transactions"), (snapshot) => {
-            totalInv = 0; totalInc = 0; totalExp = 0; totalWith = 0; totalPlum = 0;
-            partnerInvestments = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
-            
-            const tbody = document.getElementById('transactionTable');
-            tbody.innerHTML = '';
+        // ফায়ারবেস রিয়েলটাইম লিসেনার (লগইন সফল হলে চলবে)
+        function initFirebaseListeners() {
+            onSnapshot(collection(db, "transactions"), (snapshot) => {
+                totalInv = 0; totalInc = 0; totalExp = 0; totalWith = 0; totalPlum = 0;
+                partnerInvestments = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
+                
+                const tbody = document.getElementById('transactionTable');
+                tbody.innerHTML = '';
 
-            snapshot.docs.forEach((doc) => {
-                const data = doc.data();
-                if(data.type === 'investment') {
-                    totalInv += data.amount;
-                    if(partnerInvestments[data.partner] !== undefined) partnerInvestments[data.partner] += data.amount;
-                }
-                if(data.type === 'income') {
-                    totalInc += data.amount;
-                    totalPlum += (data.plumQty || 0);
-                }
-                if(data.type === 'expense') totalExp += data.amount;
-                if(data.type === 'withdraw') totalWith += data.amount;
+                snapshot.docs.forEach((doc) => {
+                    const data = doc.data();
+                    if(data.type === 'investment') {
+                        totalInv += data.amount;
+                        if(partnerInvestments[data.partner] !== undefined) partnerInvestments[data.partner] += data.amount;
+                    }
+                    if(data.type === 'income') {
+                        totalInc += data.amount;
+                        totalPlum += (data.plumQty || 0);
+                    }
+                    if(data.type === 'expense') totalExp += data.amount;
+                    if(data.type === 'withdraw') totalWith += data.amount;
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3">${data.date}</td>
-                        <td class="p-3 font-semibold text-gray-700">${data.partner}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${data.type==='income'?'bg-emerald-100 text-emerald-700':data.type==='expense'?'bg-red-100 text-red-700':data.type==='withdraw'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${data.type}</span></td>
-                        <td class="p-3">${data.desc}</td>
-                        <td class="p-3 font-semibold text-amber-700">${data.plumQty > 0 ? data.plumQty + ' কেজি' : '-'}</td>
-                        <td class="p-3 font-bold text-gray-800">৳ ${data.amount}</td>
-                    </tr>
-                `;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3">${data.date}</td>
+                            <td class="p-3 font-semibold text-gray-700">${data.partner}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${data.type==='income'?'bg-emerald-100 text-emerald-700':data.type==='expense'?'bg-red-100 text-red-700':data.type==='withdraw'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${data.type}</span></td>
+                            <td class="p-3">${data.desc}</td>
+                            <td class="p-3 font-semibold text-amber-700">${data.plumQty > 0 ? data.plumQty + ' কেজি' : '-'}</td>
+                            <td class="p-3 font-bold text-gray-800">৳ ${data.amount}</td>
+                        </tr>
+                    `;
+                });
+
+                updateUI();
             });
 
-            updateUI();
-        });
-
-        // ফায়ারবেস থেকে রিয়েলটাইম কাজের সময় লোড করা
-        onSnapshot(collection(db, "work_hours"), (snapshot) => {
-            workHours = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
-            snapshot.docs.forEach((doc) => {
-                const data = doc.data();
-                if(workHours[data.partner] !== undefined) {
-                    workHours[data.partner] += data.hours;
-                }
+            onSnapshot(collection(db, "work_hours"), (snapshot) => {
+                workHours = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
+                snapshot.docs.forEach((doc) => {
+                    const data = doc.data();
+                    if(workHours[data.partner] !== undefined) {
+                        workHours[data.partner] += data.hours;
+                    }
+                });
+                updateUI();
             });
-            updateUI();
-        });
+        }
 
         function updateUI() {
             document.getElementById('totalInvestment').innerText = `৳ ${totalInv}`;
