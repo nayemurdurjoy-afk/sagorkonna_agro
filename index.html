@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সাগরকন্যা এগ্রো ফার্ম - বরই বাগান ম্যানেজমেন্ট</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { font-family: Arial, sans-serif; } </style>
+</head>
+<body class="bg-gray-100 p-3 md:p-6">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- হেডার -->
+        <header class="bg-emerald-800 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-3xl font-bold tracking-wide">সাগরকন্যা এগ্রো ফার্ম</h1>
+                </div>
+                <p class="text-emerald-200 text-sm mt-1">প্রজেক্ট: বরই বাগান | পার্টনার: আব্দুল্লাহ আল নাইম, সৌরভ, মাহফুজুর রহমান, সুমন</p>
+            </div>
+            <div class="bg-emerald-900/80 px-4 py-2 rounded-xl text-right border border-emerald-700">
+                <span class="text-xs text-emerald-300 block">সিস্টেম স্টেটাস</span>
+                <span class="text-xs font-semibold text-emerald-100">Firebase Firestore Live</span>
+            </div>
+        </header>
+
+        <!-- ওভারভিউ ড্যাশবোর্ড -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
+                <p class="text-gray-500 text-xs font-bold uppercase">মোট ইনভেস্টমেন্ট</p>
+                <h3 class="text-xl font-extrabold text-gray-800 mt-1" id="totalInvestment">৳ 0</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                <p class="text-gray-500 text-xs font-bold uppercase">মোট বরই বিক্রি (আয়)</p>
+                <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="totalIncome">৳ 0</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
+                <p class="text-gray-500 text-xs font-bold uppercase">মোট বাগান খরচ</p>
+                <h3 class="text-xl font-extrabold text-red-600 mt-1" id="totalExpense">৳ 0</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500">
+                <p class="text-gray-500 text-xs font-bold uppercase">মোট বরই বিক্রি (কেজি)</p>
+                <h3 class="text-xl font-extrabold text-gray-800 mt-1" id="totalPlumQty">0 কেজি</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-500 col-span-2 md:col-span-1">
+                <p class="text-gray-500 text-xs font-bold uppercase">বর্তমান ক্যাশ ব্যালেন্স</p>
+                <h3 class="text-xl font-extrabold text-purple-700 mt-1" id="currentBalance">৳ 0</h3>
+            </div>
+        </div>
+
+        <!-- পার্টনারদের প্রফিট ও অনারিয়াম সামারি -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-md font-bold text-gray-800 border-b pb-3 mb-4">
+                পার্টনার সামারি ও বর্তমান লভ্যাংশ ব্রেকডাউন
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-gray-600">
+                    <thead class="bg-gray-50 text-gray-700 font-bold uppercase">
+                        <tr>
+                            <th class="p-3">পার্টনারের নাম</th>
+                            <th class="p-3">মোট ইনভেস্টমেন্ট</th>
+                            <th class="p-3">দেওয়া সময় (ঘণ্টা)</th>
+                            <th class="p-3">১০% শ্রম অনারিয়াম</th>
+                            <th class="p-3">৯০% শেয়ার প্রফিট</th>
+                            <th class="p-3 font-bold text-emerald-800">মোট প্রাপ্য (Net Profit Share)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partnerSummaryTable" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ইনপুট মডিউলসমূহ -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- লেনদেন ইনপুট -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-md font-bold mb-3 text-gray-700 border-b pb-2 flex justify-between items-center">
+                    <span>হিসাব এন্ট্রি</span>
+                    <span class="text-xs font-normal text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">আয় / খরচ / জমা</span>
+                </h2>
+                <form id="transactionForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">তারিখ</label>
+                        <input type="date" id="transDate" required class="w-full mt-1 p-2 border rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">পার্টনার নির্বাচন</label>
+                        <select id="partnerSelect" class="w-full mt-1 p-2 border rounded-lg text-xs bg-gray-50">
+                            <option value="আব্দুল্লাহ আল নাইম">আব্দুল্লাহ আল নাইম</option>
+                            <option value="সৌরভ">সৌরভ</option>
+                            <option value="মাহফুজুর রহমান">মাহফুজুর রহমান</option>
+                            <option value="সুমন">সুমন</option>
+                            <option value="সাগরকন্যা ফার্ম (সাধারণ)">সাগরকন্যা ফার্ম (সাধারণ)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">লেনদেনের ধরণ</label>
+                        <select id="typeSelect" class="w-full mt-1 p-2 border rounded-lg text-xs bg-gray-50">
+                            <option value="income">বরই বিক্রি (ইনকাম)</option>
+                            <option value="expense">বাগান খরচ (সার/কীটনাশক/শ্রমিক)</option>
+                            <option value="investment">পার্টনার ইনভেস্টমেন্ট (জমা)</option>
+                            <option value="withdraw">উত্তোলন (ক্যাশ আউট)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="plumDetails" class="grid grid-cols-2 gap-2 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                        <div>
+                            <label class="block text-[10px] font-bold text-amber-800">পরিমাণ (কেজি)</label>
+                            <input type="number" id="plumQty" class="w-full mt-0.5 p-1.5 border rounded text-xs" placeholder="যেমন: 50">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-amber-800">দর (টাকা/কেজি)</label>
+                            <input type="number" id="plumRate" class="w-full mt-0.5 p-1.5 border rounded text-xs" placeholder="যেমন: 80">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">মোট পরিমাণ (৳)</label>
+                        <input type="number" id="amountInput" required class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="টাকার পরিমাণ">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">খাত / বিবরণ</label>
+                        <input type="text" id="descInput" required class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: বাউ বরই বিক্রি / সেচ খরচ">
+                    </div>
+                    <button type="submit" id="btnTrans" class="w-full bg-emerald-700 text-white py-2 rounded-lg text-xs font-bold hover:bg-emerald-800 transition">সেভ করুন</button>
+                </form>
+            </div>
+
+            <!-- সময় ট্র্যাকিং -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-md font-bold mb-3 text-gray-700 border-b pb-2 flex justify-between items-center">
+                    <span>সময় ট্র্যাকিং</span>
+                    <span class="text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded">১০% অনারিয়াম</span>
+                </h2>
+                <form id="timeForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">তারিখ</label>
+                        <input type="date" id="workDate" required class="w-full mt-1 p-2 border rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">পার্টনার নির্বাচন</label>
+                        <select id="timePartnerSelect" class="w-full mt-1 p-2 border rounded-lg text-xs bg-gray-50">
+                            <option value="আব্দুল্লাহ আল নাইম">আব্দুল্লাহ আল নাইম</option>
+                            <option value="সৌরভ">সৌরভ</option>
+                            <option value="মাহফুজুর রহমান">মাহফুজুর রহমান</option>
+                            <option value="সুমন">সুমন</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">কাজের সময় (ঘণ্টা)</label>
+                        <input type="number" step="0.5" id="hoursInput" required class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: 4.5">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">কাজের বিবরণ</label>
+                        <input type="text" id="workDesc" class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: গাছে স্প্রে করা">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition">সময় যুক্ত করুন</button>
+                </form>
+            </div>
+
+            <!-- ইনভেন্টরি -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-md font-bold mb-3 text-gray-700 border-b pb-2 flex justify-between items-center">
+                    <span>বাগান স্টক</span>
+                    <span class="text-xs font-normal text-purple-600 bg-purple-50 px-2 py-0.5 rounded">ইনভেন্টরি</span>
+                </h2>
+                <form id="stockForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600">মালামালের নাম</label>
+                        <input type="text" id="itemName" required class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: ডিএপি সার">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600">পরিমাণ</label>
+                            <input type="number" id="itemQty" required class="w-full mt-1 p-2 border rounded-lg text-xs" placeholder="যেমন: 5">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600">একক</label>
+                            <select id="itemUnit" class="w-full mt-1 p-2 border rounded-lg text-xs bg-gray-50">
+                                <option value="বস্তা">বস্তা</option>
+                                <option value="কেজি">কেজি</option>
+                                <option value="লিটার">লিটার</option>
+                                <option value="টি">টি</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-purple-700 transition">স্টকে যুক্ত করুন</button>
+                </form>
+
+                <div class="mt-4 border-t pt-3">
+                    <h3 class="text-xs font-bold text-gray-600 mb-2">বর্তমান স্টক:</h3>
+                    <ul id="stockList" class="text-xs divide-y divide-gray-100 max-h-32 overflow-y-auto"></ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ইতিহাস টেবিল -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-md font-bold mb-4 text-gray-800">সাম্প্রতিক লেনদেন হিস্ট্রি (Firebase Live)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-gray-600">
+                    <thead class="bg-gray-50 text-gray-700 uppercase">
+                        <tr>
+                            <th class="p-3">তারিখ</th>
+                            <th class="p-3">নাম</th>
+                            <th class="p-3">ধরণ</th>
+                            <th class="p-3">বিবরণ</th>
+                            <th class="p-3">বরই বিক্রি (কেজি)</th>
+                            <th class="p-3">পরিমাণ (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTable" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK Setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // আপনার স্ক্রিনশট থেকে নেওয়া আসল ফায়ারবেস কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXuXalreeHCliv7nJoexVtaBFRQF0E1Ho",
+            authDomain: "sagarkanya-agro-farm.firebaseapp.com",
+            projectId: "sagarkanya-agro-farm",
+            storageBucket: "sagarkanya-agro-farm.firebasestorage.app",
+            messagingSenderId: "214244377034",
+            appId: "1:214244377034:web:d0b487b306c0ceac118f33",
+            measurementId: "G-39Y83Y4LFD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // গ্লোবাল ডাটা ট্র্যাকিং
+        let totalInv = 0, totalInc = 0, totalExp = 0, totalWith = 0, totalPlum = 0;
+        let partnerInvestments = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
+        let workHours = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
+
+        document.getElementById('transDate').valueAsDate = new Date();
+        document.getElementById('workDate').valueAsDate = new Date();
+
+        // অটো ক্যালকুলেটর (বরই দর * কেজি)
+        document.getElementById('plumRate').addEventListener('input', calculatePlumTotal);
+        document.getElementById('plumQty').addEventListener('input', calculatePlumTotal);
+
+        function calculatePlumTotal() {
+            const qty = parseFloat(document.getElementById('plumQty').value) || 0;
+            const rate = parseFloat(document.getElementById('plumRate').value) || 0;
+            if(qty > 0 && rate > 0) {
+                document.getElementById('amountInput').value = qty * rate;
+            }
+        }
+
+        // ফায়ারবেসে লেনদেন সেভ করা
+        document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnTrans');
+            btn.innerText = "সেভ হচ্ছে...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "transactions"), {
+                    date: document.getElementById('transDate').value,
+                    partner: document.getElementById('partnerSelect').value,
+                    type: document.getElementById('typeSelect').value,
+                    amount: parseFloat(document.getElementById('amountInput').value) || 0,
+                    desc: document.getElementById('descInput').value,
+                    plumQty: parseFloat(document.getElementById('plumQty').value) || 0,
+                    createdAt: new Date()
+                });
+                e.target.reset();
+                document.getElementById('transDate').valueAsDate = new Date();
+            } catch (error) {
+                alert("ডাটা সেভ করতে সমস্যা হয়েছে: " + error.message);
+            } finally {
+                btn.innerText = "সেভ করুন";
+                btn.disabled = false;
+            }
+        });
+
+        // ফায়ারবেসে সময় সেভ করা
+        document.getElementById('timeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "work_hours"), {
+                    date: document.getElementById('workDate').value,
+                    partner: document.getElementById('timePartnerSelect').value,
+                    hours: parseFloat(document.getElementById('hoursInput').value) || 0,
+                    desc: document.getElementById('workDesc').value,
+                    createdAt: new Date()
+                });
+                e.target.reset();
+                document.getElementById('workDate').valueAsDate = new Date();
+            } catch (error) {
+                alert("সময় সেভ করতে সমস্যা হয়েছে: " + error.message);
+            }
+        });
+
+        // ফায়ারবেস থেকে রিয়েলটাইম লেনদেন লোড করা
+        onSnapshot(collection(db, "transactions"), (snapshot) => {
+            totalInv = 0; totalInc = 0; totalExp = 0; totalWith = 0; totalPlum = 0;
+            partnerInvestments = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
+            
+            const tbody = document.getElementById('transactionTable');
+            tbody.innerHTML = '';
+
+            snapshot.docs.forEach((doc) => {
+                const data = doc.data();
+                if(data.type === 'investment') {
+                    totalInv += data.amount;
+                    if(partnerInvestments[data.partner] !== undefined) partnerInvestments[data.partner] += data.amount;
+                }
+                if(data.type === 'income') {
+                    totalInc += data.amount;
+                    totalPlum += (data.plumQty || 0);
+                }
+                if(data.type === 'expense') totalExp += data.amount;
+                if(data.type === 'withdraw') totalWith += data.amount;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3">${data.date}</td>
+                        <td class="p-3 font-semibold text-gray-700">${data.partner}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${data.type==='income'?'bg-emerald-100 text-emerald-700':data.type==='expense'?'bg-red-100 text-red-700':data.type==='withdraw'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${data.type}</span></td>
+                        <td class="p-3">${data.desc}</td>
+                        <td class="p-3 font-semibold text-amber-700">${data.plumQty > 0 ? data.plumQty + ' কেজি' : '-'}</td>
+                        <td class="p-3 font-bold text-gray-800">৳ ${data.amount}</td>
+                    </tr>
+                `;
+            });
+
+            updateUI();
+        });
+
+        // ফায়ারবেস থেকে রিয়েলটাইম কাজের সময় লোড করা
+        onSnapshot(collection(db, "work_hours"), (snapshot) => {
+            workHours = { "আব্দুল্লাহ আল নাইম": 0, "সৌরভ": 0, "মাহফুজুর রহমান": 0, "সুমন": 0 };
+            snapshot.docs.forEach((doc) => {
+                const data = doc.data();
+                if(workHours[data.partner] !== undefined) {
+                    workHours[data.partner] += data.hours;
+                }
+            });
+            updateUI();
+        });
+
+        function updateUI() {
+            document.getElementById('totalInvestment').innerText = `৳ ${totalInv}`;
+            document.getElementById('totalIncome').innerText = `৳ ${totalInc}`;
+            document.getElementById('totalExpense').innerText = `৳ ${totalExp}`;
+            document.getElementById('totalPlumQty').innerText = `${totalPlum} কেজি`;
+            document.getElementById('currentBalance').innerText = `৳ ${(totalInv + totalInc) - (totalExp + totalWith)}`;
+            renderPartnerSummary();
+        }
+
+        function renderPartnerSummary() {
+            const netProfit = totalInc - totalExp;
+            const pool10 = netProfit > 0 ? netProfit * 0.10 : 0;
+            const pool90 = netProfit > 0 ? netProfit * 0.90 : 0;
+
+            const totalHours = Object.values(workHours).reduce((a, b) => a + b, 0);
+            const totalInvPool = Object.values(partnerInvestments).reduce((a, b) => a + b, 0);
+
+            const tbody = document.getElementById('partnerSummaryTable');
+            tbody.innerHTML = '';
+
+            for (let name in partnerInvestments) {
+                let honShare = totalHours > 0 ? (workHours[name] / totalHours) * pool10 : 0;
+                let profShare = totalInvPool > 0 ? (partnerInvestments[name] / totalInvPool) * pool90 : 0;
+                let totalPayout = honShare + profShare;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-3 font-semibold text-gray-800">${name}</td>
+                        <td class="p-3">৳ ${partnerInvestments[name]}</td>
+                        <td class="p-3">${workHours[name]} ঘণ্টা</td>
+                        <td class="p-3 text-emerald-600 font-medium">৳ ${honShare.toFixed(2)}</td>
+                        <td class="p-3 text-blue-600 font-medium">৳ ${profShare.toFixed(2)}</td>
+                        <td class="p-3 font-bold text-gray-800 bg-emerald-50">৳ ${totalPayout.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
